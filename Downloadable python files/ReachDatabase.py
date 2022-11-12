@@ -60,10 +60,13 @@ def getNewVals(fieldInt, Bus):
     elif fieldInt == 5 or fieldInt == 7 or fieldInt == 9:
         if fieldInt == 5:
             field = "Morning"
-        if fieldInt == 7:
+            print(field)
+        elif fieldInt == 7:
             field = "Afternoon"
-        if fieldInt == 9:
+        elif fieldInt == 9:
             field = "Evening"
+        else:
+            print("Field int Error, Field Int: ", fieldInt)
  
         valArr = []
 		
@@ -86,24 +89,42 @@ def getNewVals(fieldInt, Bus):
                 valArr.append(ErrorCheck.CheckInput("Enter a digit for the time",list(range(x+1)),int))
  
         newVal = "".join(map(str, valArr))
+        print(newVal)
         print("Times")
  
-    elif field == 6 or field == 8 or field == 10:
-        if field == 6:
+    elif fieldInt == 6 or fieldInt == 8 or fieldInt == 10:
+        if fieldInt == 6:
             field = "Sold1"
-        if field == 8:
+        if fieldInt == 8:
             field = "Sold2"
-        if field == 10:
+        if fieldInt == 10:
             field = "Sold3"
  
-        cap = c.fetchone("SELECT Capacity FROM tblBusses WHERE BusID = ?",(Bus,))
+        c.execute(f"SELECT Capacity FROM tblBusses WHERE BusID = {Bus}")
+        cap = c.fetchone()[0]
         newVal = ErrorCheck.CheckInput("What should the new sold tickets be? (Cannot be higher than capacity)",range(cap+1),int)
         print("sold tickets")
         
     return field, newVal
  
 def addRoute():
-	print("Adding Route")
+    a = []
+
+    for i in c.execute("SELECT BusID FROM tblBusses ORDER BY BusID DESC"):
+        a.append(i[0])
+    
+    Bus = a[0]+1
+       
+    c.execute("INSERT INTO tblBusses VALUES (?,?,?,?,?,?,?,?,?,?)",(Bus, "Default destination", 10, 10, "11:00", 0, "14:00", 0, "19:00",0 ))
+ 
+    for f in range(2,11):
+        vals = getNewVals(f, Bus)
+        field = vals[0]
+        newVal = vals[1]
+ 
+        c.execute(f"UPDATE tblBusses SET {field} = ? WHERE BusID = ?",(newVal,Bus,))
+        
+    print("Adding Route")
  
 def editRoute():
     Bus = getBus("Enter ID of record you would like to change the route of")
@@ -257,11 +278,11 @@ def getTimes(bus):
     for i in c.execute("SELECT Capacity,Sold1,Sold2,Sold3 from tblBusses WHERE BusID = ?", (bus,)):
         Capacity, Sold1, Sold2, Sold3 = i
         if Capacity-Sold1 < 1:
-            ta = times.pop(1)
+            ta = times.pop(0)
         if Capacity-Sold2 < 1:
-            tb = times.pop(2)
+            tb = times.pop(1)
         if Capacity-Sold3 < 1:
-            times.pop(3)
+            times.pop(2)
  
     return times
  
