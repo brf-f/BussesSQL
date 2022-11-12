@@ -7,7 +7,6 @@ import InitialiseSQL
 
 conn = sqlite3.connect("Busses.db")
 c = conn.cursor()
- 
 ta = 0
 tb = 0
 destinations = ["Zurich","Luzern", "Sion" ,"Basel", "Bern", "Lugano", "Davos" ]
@@ -255,8 +254,8 @@ def PrintBusses():
                 if len(times) < 3:
                     if ta != 0:
                         t+=1
-                    if tb != 0 and t == 3:
-                        t=2
+                    if tb != 0 and t == 2:
+                        t=3
                 Buy(inp, t)
             else:
                 print("All tickets are fully booked")
@@ -277,6 +276,7 @@ def getTimes(bus):
  
     for i in c.execute("SELECT Capacity,Sold1,Sold2,Sold3 from tblBusses WHERE BusID = ?", (bus,)):
         Capacity, Sold1, Sold2, Sold3 = i
+        global ta,tb
         if Capacity-Sold1 < 1:
             ta = times.pop(0)
         if Capacity-Sold2 < 1:
