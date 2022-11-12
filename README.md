@@ -4,7 +4,11 @@
 
 <br>
 
-***This program is written fully in python and sqlite3***  
+***This program is written fully in python and SQL using the sqlite3 module***  
+
+<br>
+
+*Download all files into the same directory and run the main.py file to run the program.*
 
 <br>
 
