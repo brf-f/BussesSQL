@@ -8,7 +8,7 @@
 
 <br>
 
-*Download all files into the same directory and run the main.py file to run the program.*
+*Download all 4 .py files into the same directory and run the main.py file to run the program.*
 
 <br>
 
