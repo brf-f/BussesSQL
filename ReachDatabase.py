@@ -1,8 +1,10 @@
 
-import InitialiseSQL
 import sqlite3
-import ErrorCheck
 import sys
+
+import ErrorCheck
+import InitialiseSQL
+
 conn = sqlite3.connect("Busses.db")
 c = conn.cursor()
  
@@ -31,50 +33,59 @@ def Init():
                         Sold3 INT
         ); """, initTblVals=tblVals, InsrtCmd = "INSERT INTO tblBusses VALUES (?,?,?,?,?,?,?,?,?,?)")
  
-def addRoute():
-	print("Adding Route")
  
-def editRoute():
-    Bus = getBus("Enter ID of record you would like to change the route of")
-    field = ErrorCheck.CheckInput("Which field would you like to change? 1. BusId | 2. Destination | 3. Price | 4. Capacity | 5. Morning | 6. Sold1 | 7. Afternoon | 8. Sold2 | 9. Evening | 10. Sold3 |", list(range(1,11)), int)
+def getNewVals(fieldInt, Bus):
+    
+    field = "ERROR"
     newVal = "ERROR"
- 
-    if field == 1:
+    
+    if fieldInt == 1:
         print("Cannot change BUS ID")
      
-    elif field == 2:
+    elif fieldInt == 2:
         field = "Destination"
         newVal = ErrorCheck.CheckInput("What should the new bus destination be?","noList",str)
         print("Destination")
  
-    elif field == 3:
+    elif fieldInt == 3:
         field = "Price"
         newVal = ErrorCheck.CheckInput("What should the new bus ticket Price be?","noList",int)
         print("Price")
  
-    elif field == 4:
+    elif fieldInt == 4:
         field = "Capacity"
         newVal = ErrorCheck.CheckInput("What should the new bus Capacity be?","noList",int)
         print("Capacity")
     
-    elif field == 5 or field == 7 or field == 9:
-        if field == 5:
+    elif fieldInt == 5 or fieldInt == 7 or fieldInt == 9:
+        if fieldInt == 5:
             field = "Morning"
-        if field == 7:
+        if fieldInt == 7:
             field = "Afternoon"
-        if field == 9:
+        if fieldInt == 9:
             field = "Evening"
  
         valArr = []
 		
         for i in range(5):
+            x=9
+            
+            if i == 0:
+                x=2
+            elif i == 1 and valArr[0] == 2:
+                x=4
+            elif (i == 3 or i == 4) and valArr[0] == 2 and valArr[1] == 4:
+                x=0
+            elif i == 3:
+                x=5
+            
             if i == 2:
                 valArr.append(":")
             else:
                 print(valArr)
-                valArr.append(ErrorCheck.CheckInput("Enter a digit for the time"),list(range(10),int))
+                valArr.append(ErrorCheck.CheckInput("Enter a digit for the time",list(range(x+1)),int))
  
-        newVal = valArr.join("")
+        newVal = "".join(map(str, valArr))
         print("Times")
  
     elif field == 6 or field == 8 or field == 10:
@@ -88,6 +99,19 @@ def editRoute():
         cap = c.fetchone("SELECT Capacity FROM tblBusses WHERE BusID = ?",(Bus,))
         newVal = ErrorCheck.CheckInput("What should the new sold tickets be? (Cannot be higher than capacity)",range(cap+1),int)
         print("sold tickets")
+        
+    return field, newVal
+ 
+def addRoute():
+	print("Adding Route")
+ 
+def editRoute():
+    Bus = getBus("Enter ID of record you would like to change the route of")
+    field = ErrorCheck.CheckInput("Which field would you like to change? 1. BusId | 2. Destination | 3. Price | 4. Capacity | 5. Morning | 6. Sold1 | 7. Afternoon | 8. Sold2 | 9. Evening | 10. Sold3 |", list(range(1,11)), int)
+ 
+    vals = getNewVals(field, Bus)
+    field = vals[0]
+    newVal = vals[1]
  
     c.execute(f"UPDATE tblBusses SET {field} = ? WHERE BusID = ?",(newVal,Bus,))
  
