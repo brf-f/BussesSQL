@@ -254,14 +254,13 @@ def printOneRev(Bus):
  
 # getBus() Checks if user bus ID input is valid
 def getBus(inpStr):
-    #Set a equal to the largest Bus ID
-    a = []
-    for i in c.execute("SELECT BusID FROM tblBusses ORDER BY BusID DESC"):
-        a.append(i[0])
-    #Make vals list equal to all numbers from 1 to the maximum Bus ID
-    vals = list(range(1,a[0]+1))
+    #Init empty vals list
+    vals = []
+    for i in c.execute("SELECT BusID FROM tblBusses"):
+        vals.append(i[0])
     # Add -1 to Vals array for canceling the action
     vals.append(-1)
+    print(vals)
     # return an errorchecked input
     return ErrorCheck.CheckInput(inpStr, vals, int)
  
