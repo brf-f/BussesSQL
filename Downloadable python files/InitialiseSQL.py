@@ -5,6 +5,7 @@ def init(db, crtTbl, initTblVals, InsrtCmd):
     conn = sqlite3.connect(db)
     c = conn.cursor()
  
+    # try create a new table
     try:
         c.execute(crtTbl)
  
@@ -13,8 +14,10 @@ def init(db, crtTbl, initTblVals, InsrtCmd):
         conn.commit()
         print("Table created")
        
+    # Table already exists, no need to do anything
     except sqlite3.OperationalError:
         print("Table Exists")
         pass
- 
+    
+    # close connection
     c.close()
