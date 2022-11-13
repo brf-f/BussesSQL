@@ -48,13 +48,14 @@ def getNewVals(fieldInt, Bus):
  
     elif fieldInt == 3:
         field = "Price"
-        newVal = ErrorCheck.CheckInput("What should the new bus ticket Price be?","noList",int)
+        newVal = ErrorCheck.CheckInput("What should the new bus ticket Price be?","positive",int)
         print("Price")
  
     elif fieldInt == 4:
         field = "Capacity"
-        newVal = ErrorCheck.CheckInput("What should the new bus Capacity be?","noList",int)
-        print("Capacity")
+        newVal = ErrorCheck.CheckInput("What should the new bus Capacity be?","positive",int)
+        c.execute("UPDATE tblBusses SET Sold1 = 0, Sold2 = 0, Sold3 = 0 WHERE BusID = ?",(Bus,))
+        print("New capacity set and all sold tickets reset")
     
     elif fieldInt == 5 or fieldInt == 7 or fieldInt == 9:
         if fieldInt == 5:
@@ -278,11 +279,11 @@ def getTimes(bus):
         Capacity, Sold1, Sold2, Sold3 = i
         global ta,tb
         if Capacity-Sold1 < 1:
-            ta = times.pop(0)
+            ta = times.pop(-3)
         if Capacity-Sold2 < 1:
-            tb = times.pop(1)
+            tb = times.pop(-2)
         if Capacity-Sold3 < 1:
-            times.pop(2)
+            times.pop(-1)
  
     return times
  

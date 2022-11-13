@@ -15,7 +15,10 @@ def CheckInput(InpStr, expected, type):
     while True:
         getT = getType(inp)
         if getT[0] == type:
-            if expected == "noList" or getT[1] in expected:
+            if expected == "positive":
+                if getT[1] > 0:
+                    return getT[1]
+            elif expected == "noList" or getT[1] in expected:
                 return getT[1]
  
         print("Please enter a valid value")
