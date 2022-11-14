@@ -53,17 +53,17 @@ def getNewVals(fieldInt, Bus):
     #Destination field
     elif fieldInt == 2:
         field = "Destination"
-        newVal = ErrorCheck.CheckInput("What should the new bus destination be?","noList",str)
+        newVal = ErrorCheck.CheckInput("What should the new bus destination be?\n:","noList",str)
      
     #Price field
     elif fieldInt == 3:
         field = "Price"
-        newVal = ErrorCheck.CheckInput("What should the new bus ticket Price be?","positive",int)
+        newVal = ErrorCheck.CheckInput("What should the new bus ticket Price be?\n:","positive",int)
      
     #Capacity field
     elif fieldInt == 4:
         field = "Capacity"
-        newVal = ErrorCheck.CheckInput("What should the new bus Capacity be?","positive",int)
+        newVal = ErrorCheck.CheckInput("What should the new bus Capacity be?\n:","positive",int)
         # Set all sold values back to 0 to prevent more seats sold than capacity
         c.execute("UPDATE tblBusses SET Sold1 = 0, Sold2 = 0, Sold3 = 0 WHERE BusID = ?",(Bus,))
         print("New capacity set and all sold tickets reset")
@@ -72,18 +72,29 @@ def getNewVals(fieldInt, Bus):
     elif fieldInt == 5 or fieldInt == 7 or fieldInt == 9:
         if fieldInt == 5:
             field = "Morning"
-            print(field)
+            print("Changing ",field," time.\n")
         elif fieldInt == 7:
             field = "Afternoon"
+            print("Changing ",field," time.\n")
         elif fieldInt == 9:
             field = "Evening"
+            print("Changing ",field," time.\n")
         else:
             print("Field int Error, Field Int: ", fieldInt)
  
         valArr = []
-		
+        
         # Change time one digit at a time to check for a valid time value
         for i in range(5):
+            
+            # Print as neat table
+            table = Table(title="Time",box=None)
+            table.add_column("", style="#A3E4D7")
+            table.add_column("", style="#A3E4D7")
+            table.add_column("  ", style="#A3E4D7")
+            table.add_column("", style="#A3E4D7")
+            table.add_column("", style="#A3E4D7")	
+            
             x=9
             
             if i == 0:
@@ -95,16 +106,43 @@ def getNewVals(fieldInt, Bus):
             elif i == 3:
                 x=5
             
+            match len(valArr):
+                    case 0:
+                        table.add_row("_","_",":","_","_")
+                    case 1:
+                        table.add_row(str(valArr[0]),"_",":","_","_")
+                    case 2:
+                        table.add_row(str(valArr[0]),str(valArr[1]),":","_","_")
+                    case 4:
+                        table.add_row(str(valArr[0]),str(valArr[1]),":",str(valArr[3]),"_")
+            
+            if len(valArr) != 3: 
+                console = Console()
+                console.print(table)
+                print("\n")
+            
             if i == 2:
                 valArr.append(":")
             else:
-                print(valArr)
-                valArr.append(ErrorCheck.CheckInput("Enter a digit for the time",list(range(x+1)),int))
+                
+                valArr.append(ErrorCheck.CheckInput("Enter a digit for the time\n:",list(range(x+1)),int))
+                print("\n")
+        
+        # Print as neat table
+        table = Table(title="Time",box=None)
+        table.add_column("", style="#A3E4D7")
+        table.add_column("", style="#A3E4D7")
+        table.add_column("  ", style="#A3E4D7")
+        table.add_column("", style="#A3E4D7")
+        table.add_column("", style="#A3E4D7")	
+                
+        table.add_row(str(valArr[0]),str(valArr[1]),":",str(valArr[3]),str(valArr[4]))
+        console = Console()
+        console.print(table)
  
         #Join all time digits together for final time
         newVal = "".join(map(str, valArr))
-        print(newVal)
-        print("Times")
+        print("\n",newVal, " set as new time")
      
     #Sold fields
     elif fieldInt == 6 or fieldInt == 8 or fieldInt == 10:
@@ -117,7 +155,7 @@ def getNewVals(fieldInt, Bus):
  
         c.execute(f"SELECT Capacity FROM tblBusses WHERE BusID = {Bus}")
         cap = c.fetchone()[0]
-        newVal = ErrorCheck.CheckInput("What should the new sold tickets be? (Cannot be higher than capacity)",range(cap+1),int)
+        newVal = ErrorCheck.CheckInput("What should the new sold tickets be? (Cannot be higher than capacity)\n:",range(cap+1),int)
         print("sold tickets")
         
     # return the field and new value
@@ -151,7 +189,7 @@ def addRoute():
 def editRoute():
     # Get bus and field that need to be changed
     Bus = getBus("Enter ID of Bus you would like to change the route of")
-    field = ErrorCheck.CheckInput("Which field would you like to change? 1. BusId | 2. Destination | 3. Price | 4. Capacity | 5. Morning | 6. Sold1 | 7. Afternoon | 8. Sold2 | 9. Evening | 10. Sold3 |", list(range(1,11)), int)
+    field = ErrorCheck.CheckInput("Which field would you like to change? 1. BusId | 2. Destination | 3. Price | 4. Capacity | 5. Morning Time | 6. Sold1 | 7. Afternoon Time | 8. Sold2 | 9. Evening Time | 10. Sold3 |\n:", list(range(1,11)), int)
  
     # get the new values
     vals = getNewVals(field, Bus)
@@ -165,7 +203,7 @@ def editRoute():
 def ChangeRoutes():
     print("\n\n")
     # Get action user wants to do
-    actn = ErrorCheck.CheckInput("Would you like to: \n1. Add Routes\n2.Delete Routes \n3.Edit routes", [1,2,3], int)
+    actn = ErrorCheck.CheckInput("Would you like to: \n1. Add Routes\n2. Delete Routes \n3. Edit routes\n:", [1,2,3], int)
     #Run the appropriate function
     match actn:
         case 1:
@@ -186,7 +224,7 @@ def AdminMenu():
  
     print("Admin Menu:\n")
     # Get user action input
-    inp = ErrorCheck.CheckInput("Would you like to do:\n1. Edit Routes\n2. Print Revenues\n3. Reset Table\n4. Exit Program\n5. Cancel\n", [1,2,3,4,5], int)
+    inp = ErrorCheck.CheckInput("Would you like to do:\n1. Add/Delete/Edit Routes\n2. Print Revenues\n3. Reset Table\n4. Exit Program\n5. Cancel\n:", [1,2,3,4,5], int)
    
     #Do the appropriate action or run appropriate function
     match inp:
@@ -194,7 +232,7 @@ def AdminMenu():
             print("Editing Route")
             ChangeRoutes()
         case 2:
-            print("Printing Revenue")
+            print("\n\n")
             printRev()
         case 3:
             print("Reseting Table")
@@ -214,9 +252,8 @@ def AdminMenu():
  
 # printRev() redirects user to print overall or specific revenue
 def printRev():
-    print("Printing revenue")
     #get user action
-    actn = ErrorCheck.CheckInput("Would you like to: \n1. Print Overall revenue\n2.Print specific revenue", [1,2], int)
+    actn = ErrorCheck.CheckInput("Would you like to: \n1. Print Overall revenue\n2.Print specific revenue\n:", [1,2], int)
     #run the printOneRev() function with the correct parametres
     match actn:
         case 1:
