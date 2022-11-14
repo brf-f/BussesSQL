@@ -1,4 +1,5 @@
-
+from rich.console import Console
+from rich.table import Table
 import sqlite3
 import sys
 
@@ -231,15 +232,41 @@ def printRev():
 def printOneRev(Bus):
     #Printing revenue for specific bus
     if Bus != "ALL":
+                        #Print as neat table
+        table = Table(title="Bus information")
+
+        table.add_column("Destination", style="magenta")
+        table.add_column("Price", style="green")
+        table.add_column("Morning", style="#3437EE")
+        table.add_column("Sold", style="#EEA119")
+        table.add_column("Revenue", style="green")
+        table.add_column("Afternoon", style="#3437EE")
+        table.add_column("Sold", style="#EEA119")
+        table.add_column("Revenue", style="green")
+        table.add_column("Evening", style="#3437EE")
+        table.add_column("Sold", style="#EEA119")
+        table.add_column("Revenue", style="green")
+        table.add_column("Total", style="green")
+        
         print("Printing rev for ", Bus)
         #Select all variables from correct bus
         sql = f"SELECT * FROM tblBusses WHERE BusID = \"{Bus}\""
         for row in c.execute(sql):
             #Print all needed variables
             BusID, Destination, Price, Capacity, Morning, Sold1, Afternoon, Sold2, Evening, Sold3 = row
-            print(f"{Destination}: \nPrice:{Price}$ \n{Morning}: {Sold1} Tickets Sold  {Sold1*Price}$\n{Afternoon}: {Sold2} Tickets Sold  {Sold2*Price}$ \n{Evening}: {Sold3} Tickets Sold  {Sold3*Price}$ \nTotal = {(Sold1*Price)+(Sold2*Price)+(Sold3*Price)}$")
+            table.add_row(str(Destination), str(Price)+" $", str(Morning), str(Sold1), str(Sold1*Price)+" $", str(Afternoon), str(Sold2), str(Sold2*Price)+" $", str(Evening), str(Sold3), str(Sold3*Price)+" $", str((Sold1*Price)+(Sold2*Price)+(Sold3*Price))+" $")
+        
+        console = Console()
+        console.print(table)
+    
     #Print a more generic revenue for all busses
     else:
+        #Print as neat table
+        table = Table(title="Bus Revenue")
+
+        table.add_column("Destination", style="magenta")
+        table.add_column("Total", style="green")
+        
         print("Printing rev for ", Bus)
         sql = f"SELECT * FROM tblBusses"
         total = 0
@@ -247,10 +274,13 @@ def printOneRev(Bus):
         for row in c.execute(sql):
             BusID, Destination, Price, Capacity, Morning, Sold1, Afternoon, Sold2, Evening, Sold3 = row
             lTotal = (Sold1*Price)+(Sold2*Price)+(Sold3*Price)
-            print(f"{Destination}:  Total = {lTotal}$")
+            table.add_row(str(Destination), str(lTotal)+" $")
             total += lTotal
         #Print total of all combined
-        print(f"\nTotal: {total}$")
+        table.add_row("", "")
+        table.add_row("Combined Total", str(total)+" $")
+        console = Console()
+        console.print(table)
  
 # getBus() Checks if user bus ID input is valid
 def getBus(inpStr):
@@ -260,7 +290,6 @@ def getBus(inpStr):
         vals.append(i[0])
     # Add -1 to Vals array for canceling the action
     vals.append(-1)
-    print(vals)
     # return an errorchecked input
     return ErrorCheck.CheckInput(inpStr, vals, int)
  
@@ -270,13 +299,36 @@ def PrintOne(bus):
     #General busses info
     if bus == "general":
         print("General")
+        
+        #Print as neat table
+        table = Table(title="General Busses information")
+
+        table.add_column("Bus ID", style="cyan", no_wrap=True)
+        table.add_column("Destination", style="magenta")
+        table.add_column("Price", style="green")
+        
         #Select all busses and print needed values
         sql = f"SELECT * FROM tblBusses"
         for row in c.execute(sql):
             BusID, Destination, Price, Capacity, Morning, Sold1, Afternoon, Sold2, Evening, Sold3 = row
-            print(BusID, Destination, Price,"$")
+            table.add_row(str(BusID), str(Destination), str(Price)+" $")
+
+        console = Console()
+        console.print(table)
     #A specific bus's info
     else:
+                #Print as neat table
+        table = Table(title="Bus information")
+
+        table.add_column("Destination", style="magenta")
+        table.add_column("Price", style="green")
+        table.add_column("Morning", style="#3437EE")
+        table.add_column("Tickets", style="#EEA119")
+        table.add_column("Afternoon", style="#3437EE")
+        table.add_column("Tickets", style="#EEA119")
+        table.add_column("Evening", style="#3437EE")
+        table.add_column("Tickets", style="#EEA119")
+        
         #Select specific bus and print all needed values
         sql = f"SELECT * FROM tblBusses WHERE BusID = \"{bus}\""
         for row in c.execute(sql):
@@ -285,7 +337,10 @@ def PrintOne(bus):
             left1 = Capacity-Sold1
             left2 = Capacity-Sold2
             left3 = Capacity-Sold3
-            print(f"{Destination}: \nPrice:{Price}$ \n{Morning}: {left1} Tickets Left \n{Afternoon}: {left2} Tickets Left \n{Evening}: {left3} Tickets Left")
+            table.add_row(str(Destination), str(Price)+" $", str(Morning), str(left1), str(Afternoon), str(left2), str(Evening), str(left3))
+
+        console = Console()
+        console.print(table)
  
 # PrintBusses() runs PrintOne() and redirects user to Buying tickets with correct time if necessary
 def PrintBusses():
@@ -305,7 +360,15 @@ def PrintBusses():
             times = getTimes(inp)
             #If any time still has tickets left ask what VALID time they want a ticket for.
             if len(times) > 0:
-                t = ErrorCheck.CheckInput(f"What available time would you like to buy a ticket for (Fully booked times are not shown):\n{times}",list(range(1,len(times)+1)), int)
+                avTimes = times
+                match len(times):
+                    case 1:
+                        avTimes = f"1. {times[0]} "
+                    case 2:
+                        avTimes = f"1. {times[0]} \n2. {times[1]} "
+                    case 3:
+                        avTimes = f"1. {times[0]} \n2. {times[1]} \n3. {times[2]}"
+                t = ErrorCheck.CheckInput(f"What available time would you like to buy a ticket for (Fully booked times are not shown):\n{avTimes}",list(range(1,len(times)+1)), int)
                 #Change the user input to the correct variable based on which times where hidden due to being fully booked.
                 if len(times) < 3:
                     if ta != 0:
@@ -328,7 +391,6 @@ def Buy(Bus, time):
     #Update db with Sold tickets
     c.execute(f"UPDATE tblBusses SET Sold{time} = Sold{time} + 1 WHERE BusID = ?",(Bus,))
     print("Thank for buying a ticket")
-    print("PointOfSale: \n")
  
 # getTime() gets valid times where tickets are not sold out
 def getTimes(bus):
