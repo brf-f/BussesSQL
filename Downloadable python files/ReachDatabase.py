@@ -54,13 +54,11 @@ def getNewVals(fieldInt, Bus):
     elif fieldInt == 2:
         field = "Destination"
         newVal = ErrorCheck.CheckInput("What should the new bus destination be?","noList",str)
-        print("Destination")
      
     #Price field
     elif fieldInt == 3:
         field = "Price"
         newVal = ErrorCheck.CheckInput("What should the new bus ticket Price be?","positive",int)
-        print("Price")
      
     #Capacity field
     elif fieldInt == 4:
@@ -152,7 +150,7 @@ def addRoute():
 # editRoute() edits a field within a record
 def editRoute():
     # Get bus and field that need to be changed
-    Bus = getBus("Enter ID of record you would like to change the route of")
+    Bus = getBus("Enter ID of Bus you would like to change the route of")
     field = ErrorCheck.CheckInput("Which field would you like to change? 1. BusId | 2. Destination | 3. Price | 4. Capacity | 5. Morning | 6. Sold1 | 7. Afternoon | 8. Sold2 | 9. Evening | 10. Sold3 |", list(range(1,11)), int)
  
     # get the new values
@@ -216,7 +214,7 @@ def AdminMenu():
  
 # printRev() redirects user to print overall or specific revenue
 def printRev():
-    print("Printing rev")
+    print("Printing revenue")
     #get user action
     actn = ErrorCheck.CheckInput("Would you like to: \n1. Print Overall revenue\n2.Print specific revenue", [1,2], int)
     #run the printOneRev() function with the correct parametres
@@ -248,7 +246,7 @@ def printOneRev(Bus):
         table.add_column("Revenue", style="green")
         table.add_column("Total", style="green")
         
-        print("Printing rev for ", Bus)
+        print("Printing revenue for ", Bus)
         #Select all variables from correct bus
         sql = f"SELECT * FROM tblBusses WHERE BusID = \"{Bus}\""
         for row in c.execute(sql):
@@ -267,7 +265,7 @@ def printOneRev(Bus):
         table.add_column("Destination", style="magenta")
         table.add_column("Total", style="green")
         
-        print("Printing rev for ", Bus)
+        print("Printing revenue for ", Bus)
         sql = f"SELECT * FROM tblBusses"
         total = 0
         #Print generic revenue of each bus
@@ -390,7 +388,7 @@ def Buy(Bus, time):
     print("Bus",Bus, "Purchased   Time" ,time)
     #Update db with Sold tickets
     c.execute(f"UPDATE tblBusses SET Sold{time} = Sold{time} + 1 WHERE BusID = ?",(Bus,))
-    print("Thank for buying a ticket")
+    print("Thank you for buying a ticket")
  
 # getTime() gets valid times where tickets are not sold out
 def getTimes(bus):
