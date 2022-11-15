@@ -2,13 +2,19 @@ from rich.console import Console
 from rich.table import Table
 import sqlite3
 import sys
-
 import ErrorCheck
 import InitialiseSQL
+from rich.text import Text
+from rich.prompt import Prompt, Confirm
 
 # connect to database and get cursor
 conn = sqlite3.connect("Busses.db")
 c = conn.cursor()
+
+#Init console
+console = Console()
+confirmAsk = Text("Would you like to proceed with what you entered?")
+confirmAsk.stylize("red")
 
 #Init ta and tb variables with 0
 ta = 0
@@ -35,6 +41,8 @@ def Init():
                         Evening TIME,
                         Sold3 INT
         ); """, initTblVals=tblVals, InsrtCmd = "INSERT INTO tblBusses VALUES (?,?,?,?,?,?,?,?,?,?)")
+    
+    print("\n\n")
  
  
 # getNewVals gets new proper values for any field to be used for editing or adding records.
@@ -48,44 +56,99 @@ def getNewVals(fieldInt, Bus):
     
     #Bus ID field
     if fieldInt == 1:
-        print("Cannot change BUS ID")
+        text = Text("Cannot change BUS ID")
+        text.stylize("bold red on white")
+        console.print(text)
+        return
      
     #Destination field
     elif fieldInt == 2:
         field = "Destination"
-        newVal = ErrorCheck.CheckInput("What should the new bus destination be?\n:","noList",str)
+        is_correct = False
+        while not is_correct:
+            newVal = ErrorCheck.CheckInput("\n\nWhat should the new bus destination be?\n: ","noList",str)
+            is_correct = Confirm.ask(confirmAsk)
      
     #Price field
     elif fieldInt == 3:
         field = "Price"
-        newVal = ErrorCheck.CheckInput("What should the new bus ticket Price be?\n:","positive",int)
+        is_correct = False
+        while not is_correct:
+            newVal = ErrorCheck.CheckInput("\n\nWhat should the new bus ticket Price be?\n: ","positive",int)
+            is_correct = Confirm.ask(confirmAsk)
      
     #Capacity field
     elif fieldInt == 4:
         field = "Capacity"
-        newVal = ErrorCheck.CheckInput("What should the new bus Capacity be?\n:","positive",int)
+        is_correct = False
+        while not is_correct:
+            newVal = ErrorCheck.CheckInput("\n\nWhat should the new bus Capacity be?\n: ","positive",int)
+            is_correct = Confirm.ask(confirmAsk)
         # Set all sold values back to 0 to prevent more seats sold than capacity
         c.execute("UPDATE tblBusses SET Sold1 = 0, Sold2 = 0, Sold3 = 0 WHERE BusID = ?",(Bus,))
         print("New capacity set and all sold tickets reset")
      
     #Time fields
     elif fieldInt == 5 or fieldInt == 7 or fieldInt == 9:
-        if fieldInt == 5:
-            field = "Morning"
-            print("Changing ",field," time.\n")
-        elif fieldInt == 7:
-            field = "Afternoon"
-            print("Changing ",field," time.\n")
-        elif fieldInt == 9:
-            field = "Evening"
-            print("Changing ",field," time.\n")
-        else:
-            print("Field int Error, Field Int: ", fieldInt)
- 
-        valArr = []
+        is_correct = False
+        while not is_correct:
         
-        # Change time one digit at a time to check for a valid time value
-        for i in range(5):
+            if fieldInt == 5:
+                field = "Morning"
+                print("\n\nChanging ",field," time.\n")
+            elif fieldInt == 7:
+                field = "Afternoon"
+                print("\n\nChanging ",field," time.\n")
+            elif fieldInt == 9:
+                field = "Evening"
+                print("\n\nChanging ",field," time.\n")
+            else:
+                print("Field int Error, Field Int: ", fieldInt)
+    
+            valArr = []
+            
+            # Change time one digit at a time to check for a valid time value
+            for i in range(5):
+                
+                # Print as neat table
+                table = Table(title="Time",box=None)
+                table.add_column("", style="#A3E4D7")
+                table.add_column("", style="#A3E4D7")
+                table.add_column("  ", style="#A3E4D7")
+                table.add_column("", style="#A3E4D7")
+                table.add_column("", style="#A3E4D7")	
+                
+                x=9
+                
+                if i == 0:
+                    x=2
+                elif i == 1 and valArr[0] == 2:
+                    x=4
+                elif (i == 3 or i == 4) and valArr[0] == 2 and valArr[1] == 4:
+                    x=0
+                elif i == 3:
+                    x=5
+                
+                match len(valArr):
+                        case 0:
+                            table.add_row("_","_",":","_","_")
+                        case 1:
+                            table.add_row(str(valArr[0]),"_",":","_","_")
+                        case 2:
+                            table.add_row(str(valArr[0]),str(valArr[1]),":","_","_")
+                        case 4:
+                            table.add_row(str(valArr[0]),str(valArr[1]),":",str(valArr[3]),"_")
+                
+                if len(valArr) != 3: 
+                    console.print(table)
+                    print("\n")
+                
+                if i == 2:
+                    valArr.append(":")
+                else:
+                    
+                    valArr.append(ErrorCheck.CheckInput("Enter a digit for the time\n:",list(range(x+1)),int))
+                    print("\n")
             
             # Print as neat table
             table = Table(title="Time",box=None)
@@ -94,55 +157,14 @@ def getNewVals(fieldInt, Bus):
             table.add_column("  ", style="#A3E4D7")
             table.add_column("", style="#A3E4D7")
             table.add_column("", style="#A3E4D7")	
-            
-            x=9
-            
-            if i == 0:
-                x=2
-            elif i == 1 and valArr[0] == 2:
-                x=4
-            elif (i == 3 or i == 4) and valArr[0] == 2 and valArr[1] == 4:
-                x=0
-            elif i == 3:
-                x=5
-            
-            match len(valArr):
-                    case 0:
-                        table.add_row("_","_",":","_","_")
-                    case 1:
-                        table.add_row(str(valArr[0]),"_",":","_","_")
-                    case 2:
-                        table.add_row(str(valArr[0]),str(valArr[1]),":","_","_")
-                    case 4:
-                        table.add_row(str(valArr[0]),str(valArr[1]),":",str(valArr[3]),"_")
-            
-            if len(valArr) != 3: 
-                console = Console()
-                console.print(table)
-                print("\n")
-            
-            if i == 2:
-                valArr.append(":")
-            else:
-                
-                valArr.append(ErrorCheck.CheckInput("Enter a digit for the time\n:",list(range(x+1)),int))
-                print("\n")
-        
-        # Print as neat table
-        table = Table(title="Time",box=None)
-        table.add_column("", style="#A3E4D7")
-        table.add_column("", style="#A3E4D7")
-        table.add_column("  ", style="#A3E4D7")
-        table.add_column("", style="#A3E4D7")
-        table.add_column("", style="#A3E4D7")	
-                
-        table.add_row(str(valArr[0]),str(valArr[1]),":",str(valArr[3]),str(valArr[4]))
-        console = Console()
-        console.print(table)
- 
-        #Join all time digits together for final time
-        newVal = "".join(map(str, valArr))
-        print("\n",newVal, " set as new time")
+                    
+            table.add_row(str(valArr[0]),str(valArr[1]),":",str(valArr[3]),str(valArr[4]))
+            console.print(table)
+    
+            #Join all time digits together for final time
+            newVal = "".join(map(str, valArr))
+            is_correct = Confirm.ask(confirmAsk)
+        print("\n",newVal, " set as new time\n\n")
      
     #Sold fields
     elif fieldInt == 6 or fieldInt == 8 or fieldInt == 10:
@@ -155,7 +177,10 @@ def getNewVals(fieldInt, Bus):
  
         c.execute(f"SELECT Capacity FROM tblBusses WHERE BusID = {Bus}")
         cap = c.fetchone()[0]
-        newVal = ErrorCheck.CheckInput("What should the new sold tickets be? (Cannot be higher than capacity)\n:",range(cap+1),int)
+        is_correct = False
+        while not is_correct:
+            newVal = ErrorCheck.CheckInput("What should the new sold tickets be? (Cannot be higher than capacity)\n:",range(cap+1),int)
+            is_correct = Confirm.ask(confirmAsk)
         print("sold tickets")
         
     # return the field and new value
@@ -188,8 +213,8 @@ def addRoute():
 # editRoute() edits a field within a record
 def editRoute():
     # Get bus and field that need to be changed
-    Bus = getBus("Enter ID of Bus you would like to change the route of")
-    field = ErrorCheck.CheckInput("Which field would you like to change? 1. BusId | 2. Destination | 3. Price | 4. Capacity | 5. Morning Time | 6. Sold1 | 7. Afternoon Time | 8. Sold2 | 9. Evening Time | 10. Sold3 |\n:", list(range(1,11)), int)
+    Bus = getBus("\n\nEnter ID of Bus you would like to change the route of\n: ")
+    field = ErrorCheck.CheckInput("\nWhich field would you like to change? 1. BusId | 2. Destination | 3. Price | 4. Capacity | 5. Morning Time | 6. Sold1 | 7. Afternoon Time | 8. Sold2 | 9. Evening Time | 10. Sold3 |\n:", list(range(1,11)), int)
  
     # get the new values
     vals = getNewVals(field, Bus)
@@ -198,23 +223,32 @@ def editRoute():
  
     # Update db
     c.execute(f"UPDATE tblBusses SET {field} = ? WHERE BusID = ?",(newVal,Bus,))
+    print("\nRecord Updated\n\n")
  
 # ChangeRoutes() redirects the user to the correct function add/delete/or edit route
 def ChangeRoutes():
     print("\n\n")
+    
+    text = Text("\nAdmin Edit Menu:")
+    text.stylize("bold red")
+    console.print(text)
     # Get action user wants to do
     actn = ErrorCheck.CheckInput("Would you like to: \n1. Add Routes\n2. Delete Routes \n3. Edit routes\n:", [1,2,3], int)
     #Run the appropriate function
     match actn:
         case 1:
-            print("Add routes")
             addRoute()
         case 2:
-            print("Delete Routes")
-            Bus = getBus("Enter ID of Bus route you want to delete: ")
+            print("\n\n")
+            is_correct = False
+            while not is_correct:
+                Bus = getBus("Enter ID of Bus route you want to delete: ")
+                is_correct = Confirm.ask(confirmAsk)
             c.execute("DELETE FROM tblBusses WHERE BusID = ?",(Bus,))
+            text = Text(f"\n\nDELETED RECORD {Bus}\n\n")
+            text.stylize("bold red on white")
+            console.print(text)
         case 3:
-            print("Edit Routes")
             editRoute()
  
  
@@ -222,45 +256,55 @@ def ChangeRoutes():
 def AdminMenu():
     print("\n\n")
  
-    print("Admin Menu:\n")
+    text = Text("\nAdmin Menu:")
+    text.stylize("bold #DC7633")
+    console.print(text)
     # Get user action input
     inp = ErrorCheck.CheckInput("Would you like to do:\n1. Add/Delete/Edit Routes\n2. Print Revenues\n3. Reset Table\n4. Exit Program\n5. Cancel\n:", [1,2,3,4,5], int)
    
     #Do the appropriate action or run appropriate function
     match inp:
         case 1:
-            print("Editing Route")
             ChangeRoutes()
         case 2:
             print("\n\n")
             printRev()
         case 3:
-            print("Reseting Table")
             c.execute("DROP TABLE tblBusses")
             conn.commit()
             Init()
+            text = Text("\n\nRESET TABLE\n\n")
+            text.stylize("bold red on white")
+            console.print(text)
         case 4:
-            print("Exiting Program")
+            text = Text("\n\nExiting Program")
+            text.stylize("bold red on white")
+            console.print(text)
             #Commit changes to db and close connection
             conn.commit()
             conn.close()
             #exit program
             sys.exit()
         case 5:
-            print("Canceling...")
+            text = Text("Canceling...\n")
+            text.stylize("red")
+            console.print(text)
             return      
  
 # printRev() redirects user to print overall or specific revenue
 def printRev():
+    text = Text("\nAdmin Revenue Menu:")
+    text.stylize("bold #87FC79")
+    console.print(text)
     #get user action
-    actn = ErrorCheck.CheckInput("Would you like to: \n1. Print Overall revenue\n2.Print specific revenue\n:", [1,2], int)
+    actn = ErrorCheck.CheckInput("Would you like to: \n1. Print Overall revenue\n2. Print specific revenue\n: ", [1,2], int)
     #run the printOneRev() function with the correct parametres
     match actn:
         case 1:
             printOneRev("ALL")
  
         case 2:
-            Bus = getBus("Which bus would you like to print revenue for? [enter ID]")
+            Bus = getBus("\n\nWhich bus would you like to print revenue for? [enter ID]")
             printOneRev(Bus)
  
 # printOneRev() prints revenues
@@ -283,7 +327,7 @@ def printOneRev(Bus):
         table.add_column("Revenue", style="green")
         table.add_column("Total", style="green")
         
-        print("Printing revenue for ", Bus)
+        print("\n\nPrinting revenue for ", Bus,"\n")
         #Select all variables from correct bus
         sql = f"SELECT * FROM tblBusses WHERE BusID = \"{Bus}\""
         for row in c.execute(sql):
@@ -291,8 +335,8 @@ def printOneRev(Bus):
             BusID, Destination, Price, Capacity, Morning, Sold1, Afternoon, Sold2, Evening, Sold3 = row
             table.add_row(str(Destination), str(Price)+" $", str(Morning), str(Sold1), str(Sold1*Price)+" $", str(Afternoon), str(Sold2), str(Sold2*Price)+" $", str(Evening), str(Sold3), str(Sold3*Price)+" $", str((Sold1*Price)+(Sold2*Price)+(Sold3*Price))+" $")
         
-        console = Console()
         console.print(table)
+        print("\n\n")
     
     #Print a more generic revenue for all busses
     else:
@@ -302,7 +346,7 @@ def printOneRev(Bus):
         table.add_column("Destination", style="magenta")
         table.add_column("Total", style="green")
         
-        print("Printing revenue for ", Bus)
+        print("\n\nPrinting revenue for ", Bus,"\n")
         sql = f"SELECT * FROM tblBusses"
         total = 0
         #Print generic revenue of each bus
@@ -314,8 +358,8 @@ def printOneRev(Bus):
         #Print total of all combined
         table.add_row("", "")
         table.add_row("Combined Total", str(total)+" $")
-        console = Console()
         console.print(table)
+        print("\n\n")
  
 # getBus() Checks if user bus ID input is valid
 def getBus(inpStr):
@@ -333,8 +377,8 @@ def getBus(inpStr):
 def PrintOne(bus):
     #General busses info
     if bus == "general":
-        print("General")
         
+        print("\n\n")
         #Print as neat table
         table = Table(title="General Busses information")
 
@@ -348,10 +392,10 @@ def PrintOne(bus):
             BusID, Destination, Price, Capacity, Morning, Sold1, Afternoon, Sold2, Evening, Sold3 = row
             table.add_row(str(BusID), str(Destination), str(Price)+" $")
 
-        console = Console()
         console.print(table)
     #A specific bus's info
     else:
+        print("\n\n")
                 #Print as neat table
         table = Table(title="Bus information")
 
@@ -374,7 +418,6 @@ def PrintOne(bus):
             left3 = Capacity-Sold3
             table.add_row(str(Destination), str(Price)+" $", str(Morning), str(left1), str(Afternoon), str(left2), str(Evening), str(left3))
 
-        console = Console()
         console.print(table)
  
 # PrintBusses() runs PrintOne() and redirects user to Buying tickets with correct time if necessary
@@ -384,7 +427,9 @@ def PrintBusses():
     #Get user input
     inp = getBus("Enter the BusID of the bus you want to see details for, or -1 to cancel: ")
     if inp == -1:
-        print("Canceling...")
+        text = Text("Canceling...\n")
+        text.stylize("red")
+        console.print(text)
         return
     else:
         #Print info on bus
@@ -403,7 +448,7 @@ def PrintBusses():
                         avTimes = f"1. {times[0]} \n2. {times[1]} "
                     case 3:
                         avTimes = f"1. {times[0]} \n2. {times[1]} \n3. {times[2]}"
-                t = ErrorCheck.CheckInput(f"What available time would you like to buy a ticket for (Fully booked times are not shown):\n{avTimes}",list(range(1,len(times)+1)), int)
+                t = ErrorCheck.CheckInput(f"\n\nWhat available time would you like to buy a ticket for (Fully booked times are not shown):\n{avTimes}",list(range(1,len(times)+1)), int)
                 #Change the user input to the correct variable based on which times where hidden due to being fully booked.
                 if len(times) < 3:
                     if ta != 0:
@@ -421,11 +466,11 @@ def PrintBusses():
  
 # Buy() buys a ticket for the specified parametres Bus and Time
 def Buy(Bus, time):
-    print("\n\n")
+    print("\n")
     print("Bus",Bus, "Purchased   Time" ,time)
     #Update db with Sold tickets
     c.execute(f"UPDATE tblBusses SET Sold{time} = Sold{time} + 1 WHERE BusID = ?",(Bus,))
-    print("Thank you for buying a ticket")
+    print("Thank you for buying a ticket\n\n")
  
 # getTime() gets valid times where tickets are not sold out
 def getTimes(bus):

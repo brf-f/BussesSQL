@@ -1,20 +1,25 @@
 import ErrorCheck
 import ReachDatabase
- 
+from rich.console import Console
+from rich.text import Text
+
+#Init console
+console = Console()
+
 #init db at launch
 ReachDatabase.Init()
  
 #main
 while True:
-    print("\n\n Main Menu:\n")
+    text = Text("\nMain Menu:")
+    text.stylize("bold magenta")
+    console.print(text)
     #Get input of user action
-    inp = ErrorCheck.CheckInput("What would you like to access? \n1. Admin Menu \n2. Show bussess\n ", [1,2], int)
+    inp = ErrorCheck.CheckInput("What would you like to access? \n1. Admin Menu \n2. Show bussess\n: ", [1,2], int)
     match inp:
         # run admin menu if user chooses
         case 1:
-            print("Admin Menu accessed")
             ReachDatabase.AdminMenu()
         # show busses if user chooses
         case 2:
-            print("\n\nShowing Busses")
             ReachDatabase.PrintBusses()
