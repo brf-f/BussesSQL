@@ -213,17 +213,24 @@ def addRoute():
 # editRoute() edits a field within a record
 def editRoute():
     # Get bus and field that need to be changed
-    Bus = getBus("\n\nEnter ID of Bus you would like to change the route of\n: ")
-    field = ErrorCheck.CheckInput("\nWhich field would you like to change? 1. BusId | 2. Destination | 3. Price | 4. Capacity | 5. Morning Time | 6. Sold1 | 7. Afternoon Time | 8. Sold2 | 9. Evening Time | 10. Sold3 |\n:", list(range(1,11)), int)
- 
-    # get the new values
-    vals = getNewVals(field, Bus)
-    field = vals[0]
-    newVal = vals[1]
- 
-    # Update db
-    c.execute(f"UPDATE tblBusses SET {field} = ? WHERE BusID = ?",(newVal,Bus,))
-    print("\nRecord Updated\n\n")
+    Bus = getBus("\n\nEnter ID of Bus you would like to change the values of [-1 to cancel]: ")
+    if Bus != -1:
+        field = ErrorCheck.CheckInput("\nWhich field would you like to change? 1. BusId | 2. Destination | 3. Price | 4. Capacity | 5. Morning Time | 6. Sold1 | 7. Afternoon Time | 8. Sold2 | 9. Evening Time | 10. Sold3 |\n:", list(range(1,11)), int)
+    
+        # get the new values
+        vals = getNewVals(field, Bus)
+        field = vals[0]
+        newVal = vals[1]
+    
+        # Update db
+        c.execute(f"UPDATE tblBusses SET {field} = ? WHERE BusID = ?",(newVal,Bus,))
+        print("\nRecord Updated\n\n")
+    else:
+                text = Text("Canceling...\n")
+                text.stylize("red")
+                console.print(text)
+                ChangeRoutes()
+        
  
 # ChangeRoutes() redirects the user to the correct function add/delete/or edit route
 def ChangeRoutes():
@@ -233,7 +240,7 @@ def ChangeRoutes():
     text.stylize("bold red")
     console.print(text)
     # Get action user wants to do
-    actn = ErrorCheck.CheckInput("Would you like to: \n1. Add Routes\n2. Delete Routes \n3. Edit routes\n4. Cancel\n: ", [1,2,3], int)
+    actn = ErrorCheck.CheckInput("Would you like to: \n1. Add Routes\n2. Delete Routes \n3. Edit routes\n4. return\n: ", [1,2,3,4], int)
     #Run the appropriate function
     match actn:
         case 1:
@@ -242,19 +249,25 @@ def ChangeRoutes():
             print("\n\n")
             is_correct = False
             while not is_correct:
-                Bus = getBus("Enter ID of Bus route you want to delete: ")
+                Bus = getBus("Enter ID of Bus route you want to delete [-1 to cancel]: ")
                 is_correct = Confirm.ask(confirmAsk)
-            c.execute("DELETE FROM tblBusses WHERE BusID = ?",(Bus,))
-            text = Text(f"\n\nDELETED RECORD {Bus}\n\n")
-            text.stylize("bold red on white")
-            console.print(text)
+            if Bus != -1:
+                c.execute("DELETE FROM tblBusses WHERE BusID = ?",(Bus,))
+                text = Text(f"\n\nDELETED RECORD {Bus}\n\n")
+                text.stylize("bold red on white")
+                console.print(text)
+            else:
+                text = Text("Canceling...\n")
+                text.stylize("red")
+                console.print(text)
+                ChangeRoutes()
         case 3:
             editRoute()
         case 4:
-            text = Text("Canceling...\n")
+            text = Text("returning...\n")
             text.stylize("red")
             console.print(text)
-            return
+            AdminMenu()
  
  
 # AdminMenu() redirects user to correct function for action
@@ -265,7 +278,7 @@ def AdminMenu():
     text.stylize("bold #DC7633")
     console.print(text)
     # Get user action input
-    inp = ErrorCheck.CheckInput("Would you like to do:\n1. Add/Delete/Edit Routes\n2. Print Revenues\n3. Reset Table\n4. Exit Program\n5. Cancel\n: ", [1,2,3,4,5], int)
+    inp = ErrorCheck.CheckInput("Would you like to do:\n1. Add/Delete/Edit Routes\n2. Print Revenues\n3. Reset Table\n4. Exit Program\n5. return\n: ", [1,2,3,4,5], int)
    
     #Do the appropriate action or run appropriate function
     match inp:
@@ -291,7 +304,7 @@ def AdminMenu():
             #exit program
             sys.exit()
         case 5:
-            text = Text("Canceling...\n")
+            text = Text("returning...\n")
             text.stylize("red")
             console.print(text)
             return      
@@ -302,20 +315,26 @@ def printRev():
     text.stylize("bold #87FC79")
     console.print(text)
     #get user action
-    actn = ErrorCheck.CheckInput("Would you like to: \n1. Print Overall revenue\n2. Print specific revenue\n3. Cancel\n: ", [1,2], int)
+    actn = ErrorCheck.CheckInput("Would you like to: \n1. Print Overall revenue\n2. Print specific revenue\n3. return\n: ", [1,2,3], int)
     #run the printOneRev() function with the correct parametres
     match actn:
         case 1:
             printOneRev("ALL")
  
         case 2:
-            Bus = getBus("\n\nWhich bus would you like to print revenue for? [enter ID]")
-            printOneRev(Bus)
+            Bus = getBus("\n\nWhich bus would you like to print revenue for? [enter ID]  [-1 to cancel]")
+            if Bus != -1:
+                printOneRev(Bus)
+            else:
+                text = Text("Canceling...\n")
+                text.stylize("red")
+                console.print(text)
+                printRev()
         case 3:
-            text = Text("Canceling...\n")
+            text = Text("returning...\n")
             text.stylize("red")
             console.print(text)
-            return
+            AdminMenu()
  
 # printOneRev() prints revenues
 def printOneRev(Bus):
@@ -435,7 +454,7 @@ def PrintBusses():
     PrintOne("general")
     print("\n\n")
     #Get user input
-    inp = getBus("Enter the BusID of the bus you want to see details for, or -1 to cancel: ")
+    inp = getBus("Enter the BusID of the bus you want to see details for [-1 to cancel]: ")
     if inp == -1:
         text = Text("Canceling...\n")
         text.stylize("red")
