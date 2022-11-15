@@ -233,7 +233,7 @@ def ChangeRoutes():
     text.stylize("bold red")
     console.print(text)
     # Get action user wants to do
-    actn = ErrorCheck.CheckInput("Would you like to: \n1. Add Routes\n2. Delete Routes \n3. Edit routes\n:", [1,2,3], int)
+    actn = ErrorCheck.CheckInput("Would you like to: \n1. Add Routes\n2. Delete Routes \n3. Edit routes\n4. Cancel\n: ", [1,2,3], int)
     #Run the appropriate function
     match actn:
         case 1:
@@ -250,6 +250,11 @@ def ChangeRoutes():
             console.print(text)
         case 3:
             editRoute()
+        case 4:
+            text = Text("Canceling...\n")
+            text.stylize("red")
+            console.print(text)
+            return
  
  
 # AdminMenu() redirects user to correct function for action
@@ -260,7 +265,7 @@ def AdminMenu():
     text.stylize("bold #DC7633")
     console.print(text)
     # Get user action input
-    inp = ErrorCheck.CheckInput("Would you like to do:\n1. Add/Delete/Edit Routes\n2. Print Revenues\n3. Reset Table\n4. Exit Program\n5. Cancel\n:", [1,2,3,4,5], int)
+    inp = ErrorCheck.CheckInput("Would you like to do:\n1. Add/Delete/Edit Routes\n2. Print Revenues\n3. Reset Table\n4. Exit Program\n5. Cancel\n: ", [1,2,3,4,5], int)
    
     #Do the appropriate action or run appropriate function
     match inp:
@@ -297,7 +302,7 @@ def printRev():
     text.stylize("bold #87FC79")
     console.print(text)
     #get user action
-    actn = ErrorCheck.CheckInput("Would you like to: \n1. Print Overall revenue\n2. Print specific revenue\n: ", [1,2], int)
+    actn = ErrorCheck.CheckInput("Would you like to: \n1. Print Overall revenue\n2. Print specific revenue\n3. Cancel\n: ", [1,2], int)
     #run the printOneRev() function with the correct parametres
     match actn:
         case 1:
@@ -306,6 +311,11 @@ def printRev():
         case 2:
             Bus = getBus("\n\nWhich bus would you like to print revenue for? [enter ID]")
             printOneRev(Bus)
+        case 3:
+            text = Text("Canceling...\n")
+            text.stylize("red")
+            console.print(text)
+            return
  
 # printOneRev() prints revenues
 def printOneRev(Bus):
